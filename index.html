@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Career Mode Login</title>
+<link rel="stylesheet" href="styles.css">
+<script type="module" src="supabase.js"></script>
+<script type="module" src="script.js"></script>
+</head>
+<body>
+<div class="login-container">
+  <h1>Login</h1>
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+  <button id="loginBtn">Sign In</button>
+
+  <h2>Or Register</h2>
+  <input type="text" id="callsign" placeholder="Callsign">
+  <input type="text" id="name" placeholder="Name">
+  <select id="cm_type">
+    <option value="TypeA">TypeA</option>
+    <option value="TypeB">TypeB</option>
+  </select>
+  <select id="aircraft">
+    <option value="Aircraft1">Aircraft1</option>
+    <option value="Aircraft2">Aircraft2</option>
+  </select>
+  <input type="password" id="regPassword" placeholder="Password">
+  <button id="registerBtn">Register</button>
+</div>
+</body>
+</html>
