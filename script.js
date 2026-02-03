@@ -1,178 +1,220 @@
-// script.js
-import { supabase } from './supabase.js';
-import { renderNavbar } from './navbar.js';
+import { supabase } from './supabase.js'
+import { renderNavbar } from './navbar.js'
 
-document.addEventListener('DOMContentLoaded', async () => {
-  await renderNavbar();
+document.addEventListener("DOMContentLoaded", async ()=>{
+ await renderNavbar()
+ const page=location.pathname.split("/").pop()
 
-  // Detect page
-  const path = window.location.pathname.split('/').pop();
+ if(page==="admin.html") adminPage()
+ if(page==="dispatch.html") dispatchPage()
+ if(page==="pirep.html") pirepPage()
+ if(page==="shop.html") shopPage()
+})
 
-  if (path === 'index.html' || path === '') setupLoginPage();
-  if (path === 'dashboard.html') loadDashboard();
-  if (path === 'stats.html') loadStats();
-  if (path === 'dispatch.html') loadDispatch();
-  if (path === 'pirep.html') loadPirepForm();
-  if (path === 'shop.html') loadShop();
-  if (path === 'admin.html') loadAdmin();
-});
+/* ================= ADMIN ================= */
 
-/* ---------------- LOGIN & REGISTER ---------------- */
-function setupLoginPage() {
-  const loginBtn = document.getElementById('loginBtn');
-  const registerBtn = document.getElementById('registerBtn');
+async function adminPage(){
+ const legContainer=document.getElementById("legs")
 
-  loginBtn?.addEventListener('click', async () => {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return alert(error.message);
-    window.location.href = 'dashboard.html';
-  });
+ let legCount=10
 
-  registerBtn?.addEventListener('click', async () => {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('regPassword').value;
-    const callsign = document.getElementById('callsign').value;
-    const name = document.getElementById('name').value;
-    const cm_type = document.getElementById('cm_type').value;
-    const aircraft = document.getElementById('aircraft').value;
+ function addLeg(){
+  if(legCount>=30) return alert("Max 30 legs")
+  legCount++
+  renderLeg()
+ }
 
-    const { data: authData, error: authError } = await supabase.auth.signUp({ email, password });
-    if (authError) return alert(authError.message);
+ function renderLeg(){
+  const div=document.createElement("div")
+  div.className="card"
+  div.innerHTML=`
+  <input placeholder="Flight No">
+  <input placeholder="Route">
+  <input placeholder="Distance">
+  <input placeholder="Flight Time">
+  `
+  legContainer.appendChild(div)
+ }
 
-    const { error } = await supabase.from('users').insert([{ email, callsign, name, cm_type, aircraft, role: 'Pilot', balance: 0 }]);
-    if (error) return alert(error.message);
+ for(let i=0;i<10;i++) renderLeg()
 
-    alert('Registration successful!');
-    window.location.href = 'dashboard.html';
-  });
+ document.getElementById("addLeg").onclick=addLeg
+
+ document.getElementById("saveSchedule").onclick=async ()=>{
+  const email=document.getElementById("pilotEmail").value
+
+  const {data:pilot}=await supabase
+  .from("users").select("*").eq("email",email).single()
+
+  if(!pilot) return alert("Pilot not found")
+
+  const cards=[...legContainer.children]
+  if(cards.length<10) return alert("Minimum 10 legs")
+
+  let legs=[]
+
+  cards.forEach((c,i)=>{
+    const inputs=c.querySelectorAll("input")
+    legs.push({
+      pilot_id:pilot.id,
+      flight_no:inputs[0].value,
+      route:inputs[1].value,
+      distance:inputs[2].value,
+      flight_time:inputs[3].value,
+      leg:i+1
+    })
+  })
+
+  await supabase.from("schedules").insert(legs)
+  alert("Schedule saved!")
+ }
+
+ loadApprovals()
 }
 
-/* ---------------- DASHBOARD ---------------- */
-async function loadDashboard() {
-  const { data: pilots } = await supabase.from('users').select('*');
-  const { data: flights } = await supabase.from('pireps').select('*');
-  const totalDistance = flights?.reduce((sum,f) => sum+parseFloat(f.distance||0),0) || 0;
+async function loadApprovals(){
+ const box=document.getElementById("approvals")
+ if(!box) return
 
-  document.getElementById('totalPilots').textContent = pilots.length;
-  document.getElementById('totalFlights').textContent = flights.length;
-  document.getElementById('totalDistance').textContent = totalDistance.toFixed(2);
+ const {data:pireps}=await supabase
+ .from("pireps").select("*").eq("approved",false)
+
+ pireps.forEach(p=>{
+  const d=document.createElement("div")
+  d.className="card"
+  d.innerHTML=`
+  ${p.flight_no} Leg ${p.leg}
+  <button onclick="approvePirep('${p.id}')">Approve</button>`
+  box.appendChild(d)
+ })
 }
 
-/* ---------------- STATS ---------------- */
-async function loadStats() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return alert('Please login');
+window.approvePirep=async id=>{
+ const {data:p}=await supabase
+ .from("pireps").select("*").eq("id",id).single()
 
-  const { data: profile } = await supabase.from('users').select('*').eq('email', user.email).single();
-  const { data: flights } = await supabase.from('pireps').select('*').eq('pilot_id', profile.id);
+ const salary=(p.flight_time/2)*p.distance
 
-  document.getElementById('myBalance').textContent = profile.balance.toFixed(2);
-  document.getElementById('activeAircraft').textContent = profile.aircraft;
-  document.getElementById('myFlights').textContent = flights.length;
+ const {data:user}=await supabase
+ .from("users").select("*").eq("id",p.pilot_id).single()
+
+ await supabase.from("users")
+ .update({balance:user.balance+salary})
+ .eq("id",p.pilot_id)
+
+ await supabase.from("pireps")
+ .update({approved:true})
+ .eq("id",id)
+
+ alert("Approved & salary added")
 }
 
-/* ---------------- DISPATCH ---------------- */
-async function loadDispatch() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return alert('Please login');
-  const { data: profile } = await supabase.from('users').select('*').eq('email', user.email).single();
-  const { data: schedule } = await supabase.from('schedules').select('*').eq('pilot_id', profile.id);
+/* ================= DISPATCH ================= */
 
-  const container = document.getElementById('scheduleContainer');
-  container.innerHTML = '';
+async function dispatchPage(){
+ const {data:{user}}=await supabase.auth.getUser()
+ const {data:profile}=await supabase
+ .from("users").select("*")
+ .eq("email",user.email).single()
 
-  schedule.forEach(flight => {
-    const div = document.createElement('div');
-    div.style.border = '1px solid white';
-    div.style.padding = '10px';
-    div.style.margin = '10px 0';
-    div.style.borderRadius = '10px';
-    div.innerHTML = `
-      <h3>${flight.flight_no} - ${flight.route}</h3>
-      <p>Leg: ${flight.leg} | Flight Time: ${flight.flight_time}h | Distance: ${flight.distance} km</p>
-      <button ${flight.dispatched ? '' : 'disabled'} class="dispatchBtn">Dispatch</button>
-      <button ${flight.dispatched ? '' : 'disabled'} class="pirepBtn">File PIREP</button>
-    `;
-    container.appendChild(div);
-  });
+ const {data:s}=await supabase
+ .from("schedules")
+ .select("*")
+ .eq("pilot_id",profile.id)
+ .order("leg")
+
+ const box=document.getElementById("schedule")
+
+ let lastDone=true
+
+ s.forEach(f=>{
+  const locked=!lastDone
+
+  const d=document.createElement("div")
+  d.className="card"
+  d.innerHTML=`
+  <b>${f.flight_no} ${f.route}</b><br>
+  Leg ${f.leg}<br>
+  ${f.flight_time}h | ${f.distance}nm<br>
+  <button ${locked?'class="disabled"':''}
+  onclick="location.href='pirep.html?flight=${f.flight_no}&leg=${f.leg}'">
+  File PIREP</button>
+  `
+  box.appendChild(d)
+
+  lastDone=f.pirep_filed
+ })
 }
 
-/* ---------------- PIREP ---------------- */
-async function loadPirepForm() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const flightNo = urlParams.get('flightNo');
-  const leg = urlParams.get('leg');
+/* ================= PIREP ================= */
 
-  document.getElementById('flightNo').value = flightNo;
-  document.getElementById('leg').value = leg;
-  document.getElementById('date').value = new Date().toISOString().split('T')[0];
+async function pirepPage(){
+ const params=new URLSearchParams(location.search)
+ const flight=params.get("flight")
+ const leg=params.get("leg")
 
-  document.getElementById('pirepForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const { data: { user } } = await supabase.auth.getUser();
-    const { data: profile } = await supabase.from('users').select('*').eq('email', user.email).single();
+ document.getElementById("flight").value=flight
+ document.getElementById("leg").value=leg
+ document.getElementById("date").value=
+ new Date().toISOString().split("T")[0]
 
-    const values = {
-      pilot_id: profile.id,
-      flight_no: flightNo,
-      leg: parseInt(leg),
-      date: new Date().toISOString(),
-      flight_time: parseFloat(document.getElementById('flightTime').value),
-      flight_time_mins: parseInt(document.getElementById('flightTimeMins').value),
-      fuel_used: parseFloat(document.getElementById('fuelUsed').value),
-      passengers: parseInt(document.getElementById('passengers').value),
-      distance: parseFloat(document.getElementById('distance').value),
-      remarks: document.getElementById('remarks').value,
-      approved: false
-    };
+ document.getElementById("submitPirep").onclick=async ()=>{
+  const {data:{user}}=await supabase.auth.getUser()
+  const {data:profile}=await supabase
+  .from("users").select("*").eq("email",user.email).single()
 
-    await supabase.from('pireps').insert([values]);
-    alert('PIREPs submitted!');
-    window.location.href = 'dashboard.html';
-  });
+  await supabase.from("pireps").insert([{
+    pilot_id:profile.id,
+    flight_no:flight,
+    leg:leg,
+    flight_time:document.getElementById("hrs").value,
+    distance:document.getElementById("dist").value
+  }])
+
+  alert("PIREPs submitted!")
+ }
 }
 
-/* ---------------- SHOP ---------------- */
-async function loadShop() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+/* ================= SHOP ================= */
 
-  const { data: profile } = await supabase.from('users').select('*').eq('email', user.email).single();
-  const { data: ratings } = await supabase.from('type_ratings').select('*');
+async function shopPage(){
+ const {data:{user}}=await supabase.auth.getUser()
+ const {data:profile}=await supabase
+ .from("users").select("*").eq("email",user.email).single()
 
-  const container = document.getElementById('typeShopContainer');
-  container.innerHTML = '';
+ const ratings=[
+ ["Boeing 737 Series",10000],
+ ["Embraer E175",8000],
+ ["Airbus A330",12000],
+ ["B737 MAX",12000],
+ ["B787",15000],
+ ["B787-10",18000],
+ ["A350",20000],
+ ["B777-300ER",20000]
+ ]
 
-  ratings.forEach(r => {
-    const div = document.createElement('div');
-    div.style.border = '1px solid white';
-    div.style.padding = '10px';
-    div.style.margin = '10px 0';
-    div.style.borderRadius = '10px';
-    const disabled = profile.balance < r.price ? 'disabled' : '';
-    div.innerHTML = `
-      <p>${r.name} — $${r.price}</p>
-      <button ${disabled} data-id="${r.id}">Buy This Type Rating</button>
-    `;
-    container.appendChild(div);
+ const box=document.getElementById("shop")
 
-    div.querySelector('button').addEventListener('click', async () => {
-      await supabase.from('type_ratings').update({ requested_by: profile.id }).eq('id', r.id);
-      alert('Request sent to admin!');
-    });
-  });
+ ratings.forEach(r=>{
+  const disabled=profile.balance<r[1]
+  const d=document.createElement("div")
+  d.className="card"
+  d.innerHTML=`
+  ${r[0]} - $${r[1]}
+  <button ${disabled?'class="disabled"':''}
+  onclick="requestType('${r[0]}',${r[1]})">
+  Buy</button>`
+  box.appendChild(d)
+ })
 }
 
-/* ---------------- ADMIN ---------------- */
-async function loadAdmin() {
-  // Only show for admin roles
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-  const { data: profile } = await supabase.from('users').select('*').eq('email', user.email).single();
-  const adminRoles = ['CEO','CAO','CMO','CMM','CFI'];
-  if (!adminRoles.includes(profile.role)) return alert('Access denied');
+window.requestType=async (name,price)=>{
+ const {data:{user}}=await supabase.auth.getUser()
+ const {data:profile}=await supabase
+ .from("users").select("*").eq("email",user.email).single()
 
-  // TODO: Implement schedule maker, stats graph, type rating approvals
+ await supabase.from("type_requests")
+ .insert([{user_id:profile.id,type_name:name,price}])
+
+ alert("Request sent to admin")
 }
