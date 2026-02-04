@@ -1,19 +1,41 @@
 <!DOCTYPE html>
-<html>
-<head><link rel="stylesheet" href="styles.css"></head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="styles.css">
+    <title>My Stats | Crew Centre</title>
+</head>
 <body>
     <script type="module" src="navbar.js"></script>
-    <div class="airline-stats-box">
-        <h2 id="pilotName">Loading...</h2>
-        <p>Current Family: <span id="pilotFamily">---</span></p>
-        <div class="stats-grid">
-            <div class="stat-card">Total Earnings: <span id="statEarning">$0</span></div>
-            <div class="stat-card">Flights Completed: <span id="statFlights">0</span></div>
+    <main class="container">
+        <h1 style="text-align: center;">Pilot Records</h1>
+        <div class="stats-row">
+            <div class="stats-box box-gold">
+                <small>Account Balance</small>
+                <h2 id="pBalance">$0</h2>
+            </div>
+            <div class="stats-box box-teal">
+                <small>Active Aircraft Family</small>
+                <h2 id="pFamily">Loading...</h2>
+            </div>
+            <div class="stats-box box-deep">
+                <small>Completed Flights</small>
+                <h2 id="pFlights">0</h2>
+            </div>
         </div>
-    </div>
+    </main>
     <script type="module">
         import { supabase } from './supabase.js';
-        // Fetch profile and count(pireps) where pilot_id = user.id
+        async function loadMyStats() {
+            const { data: { user } } = await supabase.auth.getUser();
+            const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+            const { count } = await supabase.from('pireps').select('*', { count: 'exact', head: true }).eq('pilot_id', user.id).eq('status', 'Approved');
+            
+            document.getElementById('pBalance').innerText = "$" + (profile.balance || 0).toLocaleString();
+            document.getElementById('pFamily').innerText = profile.aircraft_family || "Cessna 172";
+            document.getElementById('pFlights').innerText = count || 0;
+        }
+        loadMyStats();
     </script>
 </body>
 </html>
