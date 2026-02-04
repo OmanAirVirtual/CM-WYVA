@@ -1,20 +1,29 @@
-<div id="nav"></div>
-<div class="container card">
-<input id="hrs" placeholder="Flight Time">
-<input id="dist" placeholder="Distance">
-<button onclick="submit()">Submit</button>
-</div>
+<!DOCTYPE html>
+<html>
+<head><link rel="stylesheet" href="styles.css"></head>
+<body>
+    <script type="module" src="navbar.js"></script>
+    <div class="form-container">
+        <h2>File Flight Report (Pirep)</h2>
+        <form id="pirepForm">
+            <input type="text" id="f_no" readonly>
+            <input type="text" id="f_date" readonly>
+            <input type="text" id="f_leg" readonly>
+            <input type="number" id="f_time_h" placeholder="Flight Time (Hrs)" required>
+            <input type="number" id="f_time_m" placeholder="Flight Time (Mins)" required>
+            <input type="number" id="f_fuel" placeholder="Fuel Used (kg)" required>
+            <input type="number" id="f_pax" placeholder="Passengers" required>
+            <input type="number" id="f_dist" placeholder="Actual Distance" required>
+            <textarea id="f_remarks" placeholder="Remarks"></textarea>
+            <button type="submit">Submit Pirep for Approval</button>
+        </form>
+    </div>
 
-<script type="module">
-import {supabase} from './supabase.js'
-
-window.submit=async()=>{
- const {data:{user}}=await supabase.auth.getUser()
- await supabase.from("pireps").insert([{
-  pilot_email:user.email,
-  flight_time:hrs.value,
-  distance:dist.value
- }])
- alert("Submitted")
-}
-</script>
+    <script type="module">
+        const urlParams = new URLSearchParams(window.location.search);
+        document.getElementById('f_leg').value = "Leg: " + urlParams.get('leg');
+        document.getElementById('f_date').value = new Date().toLocaleDateString();
+        // Fetch Flight No from 'schedules' table based on Leg #
+    </script>
+</body>
+</html>
