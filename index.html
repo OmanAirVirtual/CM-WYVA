@@ -1,32 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Career Mode Login</title>
 <link rel="stylesheet" href="styles.css">
-<script type="module" src="supabase.js"></script>
-<script type="module" src="script.js"></script>
 </head>
 <body>
-<div class="login-container">
-  <h1>Login</h1>
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
-  <button id="loginBtn">Sign In</button>
 
-  <h2>Or Register</h2>
-  <input type="text" id="callsign" placeholder="Callsign">
-  <input type="text" id="name" placeholder="Name">
-  <select id="cm_type">
-    <option value="TypeA">TypeA</option>
-    <option value="TypeB">TypeB</option>
+<div class="container">
+ <h1>Sign In</h1>
+ <button onclick="signIn()">➕ Sign In</button>
+
+ <div id="setup" style="display:none" class="card">
+  <input id="cs" placeholder="Callsign">
+  <input id="namev" placeholder="Name">
+  <select id="career">
+   <option>Flexible</option>
+   <option>Zero</option>
   </select>
   <select id="aircraft">
-    <option value="Aircraft1">Aircraft1</option>
-    <option value="Aircraft2">Aircraft2</option>
+   <option>B737</option>
+   <option>A320</option>
   </select>
-  <input type="password" id="regPassword" placeholder="Password">
-  <button id="registerBtn">Register</button>
+  <button onclick="saveProfile()">Save</button>
+ </div>
 </div>
+
+<script type="module" src="script.js"></script>
 </body>
 </html>
