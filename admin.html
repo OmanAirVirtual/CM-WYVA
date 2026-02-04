@@ -1,52 +1,128 @@
 <!DOCTYPE html>
-<html>
-<head><link rel="stylesheet" href="styles.css"></head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Admin Dashboard | Control Center</title>
+</head>
 <body>
     <script type="module" src="navbar.js"></script>
-    <div class="container">
-        <h2>Schedule Maker (15 Compulsory Legs)</h2>
-        <input type="text" id="adminPilotCallsign" placeholder="Pilot Callsign">
-        <div id="legsContainer"></div>
-        <button onclick="saveSchedule()" style="margin-top:20px; padding:15px; background:green; color:white;">Save 15-Leg Schedule</button>
 
-        <hr>
-        <h2>Pending Pireps (Approvals)</h2>
-        <div id="pirepApprovalList"></div>
+    <main class="container">
+        <h1 style="margin-bottom: 30px;">Admin Control Center</h1>
 
-        <hr>
-        <h2>Type Rating Requests</h2>
-        <div id="ratingRequests"></div>
-    </div>
+        <div class="admin-section" style="margin-bottom: 30px;">
+            <button class="drop-btn" id="toggleSchedule">
+                <span>Assign Monthly Schedule (15 Legs)</span>
+                <span class="arrow">▼</span>
+            </button>
+            <div class="dropdown-content" id="scheduleDropdown">
+                <div style="padding: 20px;">
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <input type="text" id="targetPilotCallsign" placeholder="Pilot Callsign (e.g. OMA101)" style="flex: 2;">
+                        <input type="email" id="targetPilotEmail" placeholder="Pilot Email" style="flex: 2;">
+                    </div>
+
+                    <div id="legsWrapper" style="display: flex; flex-direction: column; gap: 10px;">
+                        </div>
+
+                    <button id="saveScheduleBtn" style="background: #27ae60; width: 100%; margin-top: 20px; padding: 15px;">
+                        Deploy Full Schedule
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <section class="airline-stats-box" style="margin-bottom: 30px;">
+            <h3>Monthly Airline Performance</h3>
+            <div class="stats-grid" style="display: flex; justify-content: space-around; padding: 10px;">
+                <div><small>Pilots</small><h4 id="adminTotalPilots">0</h4></div>
+                <div><small>Monthly PIREPs</small><h4 id="adminTotalPireps">0</h4></div>
+                <div><small>Monthly Distance</small><h4 id="adminTotalDist">0 nm</h4></div>
+            </div>
+            <p style="font-size: 0.8rem; opacity: 0.7;">Stats reset automatically at start of month.</p>
+        </section>
+
+        <section class="career-section">
+            <h3>Type Rating Approvals</h3>
+            <div id="typeRatingList">
+                <p>No pending requests.</p>
+            </div>
+        </section>
+
+        <section class="career-section" style="margin-top: 30px; border-left-color: #f1c40f;">
+            <h3>Pending Flight Reports</h3>
+            <div id="pirepApprovalList">
+                <p>All clear! No pending PIREPs.</p>
+            </div>
+        </section>
+    </main>
 
     <script type="module">
         import { supabase } from './supabase.js';
 
-        // Generate 15 Leg Inputs
-        const container = document.getElementById('legsContainer');
-        for(let i=1; i<=15; i++) {
-            container.innerHTML += `
-                <div class="leg-input-row">
-                    <h4>Leg ${i}</h4>
-                    <input type="text" id="route-${i}" placeholder="Route (eg. KJFK-EGLL)">
-                    <input type="text" id="fn-${i}" placeholder="Flight No">
-                    <input type="number" id="dist-${i}" placeholder="Distance">
-                    <input type="number" id="time-${i}" placeholder="Time (Hrs)">
+        // --- 1. Animation Logic ---
+        const toggleBtn = document.getElementById('toggleSchedule');
+        const dropdown = document.getElementById('scheduleDropdown');
+
+        toggleBtn.addEventListener('click', () => {
+            dropdown.classList.toggle('show');
+            toggleBtn.classList.toggle('active');
+        });
+
+        // --- 2. Generate 15 Leg Inputs ---
+        const wrapper = document.getElementById('legsWrapper');
+        for (let i = 1; i <= 15; i++) {
+            wrapper.innerHTML += `
+                <div class="leg-row" style="display:flex; gap:8px; align-items:center; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 8px;">
+                    <span style="font-weight:bold; width: 25px;">${i}</span>
+                    <input type="text" id="rt-${i}" placeholder="Route" style="flex:2;">
+                    <input type="text" id="fn-${i}" placeholder="Flight No" style="flex:1;">
+                    <input type="number" id="di-${i}" placeholder="Dist" style="flex:1;">
+                    <input type="number" id="ti-${i}" placeholder="Time" style="flex:1;">
                 </div>`;
         }
 
-        window.saveSchedule = async () => {
-            const callsign = document.getElementById('adminPilotCallsign').value;
-            // Logic to loop through 1-15, collect data, and .insert() to 'schedules' table
-            alert("Schedule saved to database.");
-        };
+        // --- 3. Load Admin Stats ---
+        async function loadAdminDashboard() {
+            // Get Month Start Date for Monthly Stats
+            const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
 
-        // Salary Logic for Approval
+            // Fetch Pilots
+            const { count: pilots } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
+            
+            // Fetch Monthly Pireps
+            const { data: pireps } = await supabase.from('pireps')
+                .select('distance_flown')
+                .gte('created_at', startOfMonth);
+
+            const totalDist = pireps?.reduce((acc, curr) => acc + (curr.distance_flown || 0), 0) || 0;
+
+            document.getElementById('adminTotalPilots').innerText = pilots || 0;
+            document.getElementById('adminTotalPireps').innerText = pireps?.length || 0;
+            document.getElementById('adminTotalDist').innerText = totalDist.toLocaleString() + " nm";
+
+            loadRequests();
+        }
+
+        // --- 4. Load Type Ratings & PIREPs ---
+        async function loadRequests() {
+            // Logic to fetch from 'requests' table and 'pireps' where status is 'Pending'
+            // Injects HTML with "Approve" and "Reject" buttons
+        }
+
+        // --- 5. Salary Logic on Approval ---
         window.approvePirep = async (pirepId, pilotId, time, dist) => {
             const salary = (time / 2) * dist;
-            // 1. Update Pirep status to 'Approved'
-            // 2. Fetch pilot balance, add salary, update 'profiles'
-            alert(`Approved! Pilot earned $${salary}`);
+            
+            // 1. Update Pilot Balance
+            // 2. Update Pirep Status
+            alert(`Pirep Approved. Pilot earned $${salary}`);
+            loadAdminDashboard();
         };
+
+        loadAdminDashboard();
     </script>
 </body>
 </html>
