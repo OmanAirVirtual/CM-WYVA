@@ -1,9 +1,47 @@
-<div id="nav"></div>
-<div class="container">
-<div class="card">
-<h2>Career Mode</h2>
-<p>Welcome to Oman Air Virtual Career Mode.</p>
-</div>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Dashboard | Virtual Airline</title>
+</head>
+<body>
+    <script type="module" src="navbar.js"></script>
 
-<script type="module" src="script.js"></script>
+    <main class="content-wrapper">
+        <section class="airline-stats-box">
+            <h2>Global Fleet Statistics</h2>
+            <div class="stats-grid">
+                <div><small>Total Pilots</small><h3 id="totalPilots">--</h3></div>
+                <div><small>Total Distance</small><h3 id="totalDist">-- nm</h3></div>
+                <div><small>Total Pireps</small><h3 id="totalPireps">--</h3></div>
+            </div>
+        </section>
+
+        <section class="career-section">
+            <h3>Welcome to Career Mode</h3>
+            <p>
+                Embark on a journey from a Cadet to a Senior Captain. 
+                Complete your monthly 15-leg assignments, earn salary based on flight performance, 
+                and unlock advanced type ratings to fly heavier metal. Your progression is tracked in real-time.
+            </p>
+        </section>
+    </main>
+
+    <script type="module">
+        import { supabase } from './supabase.js';
+        async function fetchGlobalStats() {
+            const { count: pilotCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
+            const { data: pireps } = await supabase.from('pireps').select('distance_flown');
+            
+            const totalDistance = pireps?.reduce((acc, curr) => acc + (curr.distance_flown || 0), 0) || 0;
+            
+            document.getElementById('totalPilots').innerText = pilotCount || 0;
+            document.getElementById('totalPireps').innerText = pireps?.length || 0;
+            document.getElementById('totalDist').innerText = totalDistance.toLocaleString() + " nm";
+        }
+        fetchGlobalStats();
+    </script>
+</body>
+</html>
