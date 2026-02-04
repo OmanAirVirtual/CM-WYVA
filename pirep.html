@@ -1,28 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>File PIREP</title>
-<link rel="stylesheet" href="styles.css">
-<script type="module" src="supabase.js"></script>
-<script type="module" src="navbar.js"></script>
-<script type="module" src="script.js"></script>
-</head>
-<body>
-<div id="navbar"></div>
+<div id="nav"></div>
+<div class="container card">
+<input id="hrs" placeholder="Flight Time">
+<input id="dist" placeholder="Distance">
+<button onclick="submit()">Submit</button>
+</div>
 
-<h2>File PIREP</h2>
-<form id="pirepForm">
-  <label>Flight No: <input type="text" id="flightNo" readonly></label>
-  <label>Date: <input type="date" id="date" readonly></label>
-  <label>Leg: <input type="number" id="leg" readonly></label>
-  <label>Flight Time (hrs): <input type="number" id="flightTime" step="0.1"></label>
-  <label>Flight Time (mins): <input type="number" id="flightTimeMins"></label>
-  <label>Fuel Used: <input type="number" id="fuelUsed"></label>
-  <label>Passengers: <input type="number" id="passengers"></label>
-  <label>Distance: <input type="number" id="distance"></label>
-  <label>Remarks: <textarea id="remarks"></textarea></label>
-  <button type="submit">Submit PIREP</button>
-</form>
-</body>
-</html>
+<script type="module">
+import {supabase} from './supabase.js'
+
+window.submit=async()=>{
+ const {data:{user}}=await supabase.auth.getUser()
+ await supabase.from("pireps").insert([{
+  pilot_email:user.email,
+  flight_time:hrs.value,
+  distance:dist.value
+ }])
+ alert("Submitted")
+}
+</script>
