@@ -3,50 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="styles.css">
-    <title>Dispatch</title>
+    <title>Dispatch | Crew Centre</title>
 </head>
 <body>
     <script type="module" src="navbar.js"></script>
-    <div class="content">
-        <h1>Monthly Schedule</h1>
-        <div id="schedule-grid" class="dispatch-container">
-            </div>
-    </div>
-
+    <main class="container">
+        <h1>Monthly Flight Schedule</h1>
+        <div id="scheduleGrid"></div>
+    </main>
     <script type="module">
         import { supabase } from './supabase.js';
-        
         async function loadDispatch() {
             const { data: { user } } = await supabase.auth.getUser();
-            const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-            const { data: schedule } = await supabase.from('schedules').select('*').eq('pilot_id', user.id).order('leg_num', { ascending: true });
-            const { data: pireps } = await supabase.from('pireps').select('leg_num').eq('pilot_id', user.id).eq('status', 'Approved');
-
+            const { data: legs } = await supabase.from('schedules').select('*').eq('pilot_id', user.id).order('leg_num');
+            const { data: pireps } = await supabase.from('pireps').select('leg_num').eq('pilot_id', user.id);
+            
             const completedLegs = pireps.map(p => p.leg_num);
-            const container = document.getElementById('schedule-grid');
+            const grid = document.getElementById('scheduleGrid');
 
-            schedule.forEach((leg, index) => {
-                // Logic: Leg 1 is always open. Others open only if previous leg is in completedLegs
+            legs.forEach((leg, index) => {
                 const isLocked = leg.leg_num > 1 && !completedLegs.includes(leg.leg_num - 1);
                 const isFiled = completedLegs.includes(leg.leg_num);
 
-                container.innerHTML += `
+                grid.innerHTML += `
                     <div class="flight-card ${isLocked ? 'locked' : ''}">
-                        <div class="card-header">
-                            <span>${leg.flight_no}</span> <strong>${leg.route}</strong>
+                        <div class="card-top">${leg.flight_no} - ${leg.route}</div>
+                        <div class="card-mid">
+                            <span class="leg-indicator">Leg ${leg.leg_num}</span>
+                            <span class="time-indicator">${leg.flight_time}h</span>
                         </div>
-                        <div class="card-body">
-                            <div class="leg-circle">Leg ${leg.leg_num}</div>
-                            <div class="details">
-                                <p>Time: <strong>${leg.flight_time}h</strong></p>
-                                <p>Dist: ${leg.distance}nm</p>
-                            </div>
-                        </div>
-                        <div class="card-actions">
-                            <button onclick="location.href='pirep.html?leg=${leg.leg_num}'" 
-                                ${isLocked || isFiled ? 'disabled' : ''} class="btn-dispatch">
+                        <div class="card-bottom">Distance: ${leg.distance}nm</div>
+                        <div class="card-buttons">
+                            <button onclick="location.href='pirep.html?leg=${leg.leg_num}'" ${isLocked || isFiled ? 'disabled' : ''}>
                                 ${isFiled ? 'Completed' : 'Dispatch'}
                             </button>
+                            ${!isLocked && !isFiled ? `<button onclick="location.href='pirep.html?leg=${leg.leg_num}'">File Pirep</button>` : ''}
                         </div>
                     </div>`;
             });
