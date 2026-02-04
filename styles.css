@@ -1,63 +1,34 @@
-body{
- margin:0;
- font-family:sans-serif;
- background:linear-gradient(135deg,#0f5fff,#b300ff);
- color:white;
+/* Container for the 15-leg Admin Form */
+.leg-input-row {
+    display: flex;
+    gap: 10px;
+    background: #fff;
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
 }
 
-.container{
- max-width:900px;
- margin:auto;
- padding:20px;
+.leg-input-row input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+
+/* Career Box */
+.career-section {
+    padding: 20px;
+    background: white;
+    margin: 20px;
+    border-radius: 15px;
+    border-left: 10px solid #2a5298;
 }
 
-.card{
- background:rgba(255,255,255,0.15);
- padding:20px;
- border-radius:20px;
- margin:15px 0;
- backdrop-filter:blur(10px);
+/* Dispatch Box Styling */
+.flight-box {
+    display: grid;
+    grid-template-areas: "top top" "center side" "bottom side";
+    background: white;
+    padding: 20px;
+    margin: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
-input,select,button{
- width:100%;
- padding:12px;
- border-radius:12px;
- border:none;
- margin:8px 0;
-}
-
-button{
- cursor:pointer;
- font-weight:bold;
-}
-
-.navbar{
- display:flex;
- justify-content:space-between;
- align-items:center;
- background:white;
- color:black;
- padding:10px 20px;
- border-radius:20px;
- margin:10px;
-}
-
-.nav-links a{
- margin:0 10px;
- text-decoration:none;
- font-weight:bold;
-}
-
-.statbox{
- padding:30px;
- border-radius:20px;
- text-align:center;
- font-size:22px;
- background:rgba(255,255,255,0.2);
-}
-
-.disabled{
- opacity:.4;
- pointer-events:none;
-}
+.locked { filter: grayscale(1) opacity(0.5); pointer-events: none; }
