@@ -100,3 +100,52 @@ button:disabled {
     opacity: 0.5;
     pointer-events: none;
 }
+
+/* The container starts hidden */
+.dropdown-content {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.5s ease-out, opacity 0.3s ease;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0 0 15px 15px;
+}
+
+/* When the "show" class is added via JS */
+.dropdown-content.show {
+    max-height: 2000px; /* High enough to fit 15 legs */
+    opacity: 1;
+    padding: 20px;
+    margin-top: -10px; /* Merges with the button above */
+}
+
+/* The Toggle Button */
+.drop-btn {
+    width: 100%;
+    background: linear-gradient(45deg, #1e3c72, #2a5298);
+    color: white;
+    padding: 15px;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: 0.3s;
+}
+
+.drop-btn:hover {
+    filter: brightness(1.2);
+}
+
+/* The arrow icon rotation */
+.arrow {
+    transition: transform 0.3s ease;
+}
+
+.drop-btn.active .arrow {
+    transform: rotate(180deg);
+}
+
