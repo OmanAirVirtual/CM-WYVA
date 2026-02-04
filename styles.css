@@ -1,10 +1,10 @@
-/* General Reset & Background */
+/* General Reset & Center Alignment */
 body {
     margin: 0;
     padding: 0;
     font-family: 'Inter', 'Segoe UI', sans-serif;
-    /* Deep Professional Gradient */
-    background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+    /* Updated Color Scheme: #429bf5 to #ce42f5 */
+    background: linear-gradient(135deg, #429bf5 0%, #ce42f5 100%);
     background-attachment: fixed;
     color: white;
     display: flex;
@@ -13,25 +13,35 @@ body {
     min-height: 100vh;
 }
 
-/* Glassmorphism Containers */
-.container, .auth-box, .form-container, .airline-stats-box, .career-section {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+/* Centered Content Wrapper */
+.container, .admin-section, .auth-box, .career-section {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 20px;
     padding: 30px;
     width: 90%;
-    max-width: 800px;
+    max-width: 900px;
     margin: 20px auto;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
     text-align: center;
 }
 
-/* Navigation Bar Styling */
+/* Specific Airline Stats Box */
+.airline-stats-box {
+    background: linear-gradient(45deg, #429bf5, #ce42f5);
+    color: white;
+    border-radius: 20px;
+    padding: 25px;
+    margin: 20px 0;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* Nav Bar (White Rectangle) */
 nav {
     background: white;
-    border-radius: 15px;
-    padding: 10px 25px;
+    border-radius: 50px;
+    padding: 10px 30px;
     display: flex;
     gap: 20px;
     align-items: center;
@@ -41,111 +51,32 @@ nav {
 nav a {
     text-decoration: none;
     color: #333;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: 0.3s;
+    font-weight: 700;
 }
 
-nav a:hover { color: #2575fc; }
-
-/* Dashboard Airline Stats Box (Specific Request) */
-.airline-stats-box {
-    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-    color: white;
-    border: none;
-}
-
-/* Buttons */
-button {
-    background: #2575fc;
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 10px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(37, 117, 252, 0.4);
-}
-
-button:disabled {
-    background: #444;
-    cursor: not-allowed;
-    filter: grayscale(1);
-}
-
-/* Flight Cards (Dispatch Page) */
-.dispatch-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    width: 90%;
-}
-
-.flight-card {
-    background: white;
-    color: #333;
-    border-radius: 15px;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-}
-
-.locked {
-    filter: blur(4px) grayscale(1);
-    opacity: 0.5;
-    pointer-events: none;
-}
-
-/* The container starts hidden */
+/* Smooth Dropdown Animation */
 .dropdown-content {
     max-height: 0;
     overflow: hidden;
     opacity: 0;
-    transition: max-height 0.5s ease-out, opacity 0.3s ease;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 0 0 15px 15px;
+    transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
 }
 
-/* When the "show" class is added via JS */
 .dropdown-content.show {
-    max-height: 2000px; /* High enough to fit 15 legs */
+    max-height: 2500px;
     opacity: 1;
-    padding: 20px;
-    margin-top: -10px; /* Merges with the button above */
 }
 
-/* The Toggle Button */
+/* Dropdown Toggle Button */
 .drop-btn {
     width: 100%;
-    background: linear-gradient(45deg, #1e3c72, #2a5298);
-    color: white;
+    background: white;
+    color: #429bf5;
     padding: 15px;
     border: none;
     border-radius: 15px;
     cursor: pointer;
     font-weight: bold;
-    font-size: 1.1rem;
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    transition: 0.3s;
 }
-
-.drop-btn:hover {
-    filter: brightness(1.2);
-}
-
-/* The arrow icon rotation */
-.arrow {
-    transition: transform 0.3s ease;
-}
-
-.drop-btn.active .arrow {
-    transform: rotate(180deg);
-}
-
