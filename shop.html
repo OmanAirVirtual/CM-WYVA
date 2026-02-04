@@ -1,18 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Type Rating Shop</title>
-<link rel="stylesheet" href="styles.css">
-<script type="module" src="supabase.js"></script>
-<script type="module" src="navbar.js"></script>
-<script type="module" src="script.js"></script>
-</head>
-<body>
-<div id="navbar"></div>
+<div id="nav"></div>
+<div class="container" id="shop"></div>
 
-<h2>Buy Type Ratings</h2>
-<div id="typeShopContainer"></div>
-<!-- JS will populate buttons and disable if balance < price -->
-</body>
-</html>
+<script type="module">
+import {supabase} from './supabase.js'
+
+const types=[
+["B737",10000],
+["A330",12000]
+]
+
+types.forEach(t=>{
+ const d=document.createElement("div")
+ d.className="card"
+ d.innerHTML=`${t[0]} $${t[1]} 
+ <button onclick="req('${t[0]}',${t[1]})">Buy</button>`
+ shop.appendChild(d)
+})
+
+window.req=async(name,price)=>{
+ const {data:{user}}=await supabase.auth.getUser()
+ await supabase.from("type_requests")
+ .insert([{pilot_email:user.email,type_name:name,price}])
+ alert("Requested")
+}
+</script>
