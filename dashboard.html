@@ -2,46 +2,43 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
-    <title>Dashboard | Virtual Airline</title>
+    <title>Dashboard | Crew Centre</title>
 </head>
 <body>
     <script type="module" src="navbar.js"></script>
-
-    <main class="content-wrapper">
-        <section class="airline-stats-box">
-            <h2>Global Fleet Statistics</h2>
-            <div class="stats-grid">
-                <div><small>Total Pilots</small><h3 id="totalPilots">--</h3></div>
-                <div><small>Total Distance</small><h3 id="totalDist">-- nm</h3></div>
-                <div><small>Total Pireps</small><h3 id="totalPireps">--</h3></div>
-            </div>
-        </section>
-
+    <main class="container">
         <section class="career-section">
-            <h3>Welcome to Career Mode</h3>
-            <p>
-                Embark on a journey from a Cadet to a Senior Captain. 
-                Complete your monthly 15-leg assignments, earn salary based on flight performance, 
-                and unlock advanced type ratings to fly heavier metal. Your progression is tracked in real-time.
-            </p>
+            <h2 style="color: white; margin-top: 0;">Welcome to Oman Air Virtual</h2>
+            <p>Welcome to the most advanced career mode. Fly, earn, and upgrade your fleet. Our career system is designed to simulate the life of a commercial pilot, requiring precision, dedication, and professional flight reporting.</p>
         </section>
-    </main>
 
+        <div class="stats-row">
+            <div class="stats-box box-blue">
+                <small>Total Pilots</small>
+                <h2 id="totalPilots">0</h2>
+            </div>
+            <div class="stats-box box-purple">
+                <small>Monthly Distance</small>
+                <h2 id="totalDist">0 nm</h2>
+            </div>
+            <div class="stats-box box-pink">
+                <small>Total PIREPs</small>
+                <h2 id="totalPireps">0</h2>
+            </div>
+        </div>
+    </main>
     <script type="module">
         import { supabase } from './supabase.js';
-        async function fetchGlobalStats() {
-            const { count: pilotCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
-            const { data: pireps } = await supabase.from('pireps').select('distance_flown');
-            
-            const totalDistance = pireps?.reduce((acc, curr) => acc + (curr.distance_flown || 0), 0) || 0;
-            
-            document.getElementById('totalPilots').innerText = pilotCount || 0;
+        async function loadGlobalStats() {
+            const { count: pilots } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
+            const { data: pireps } = await supabase.from('pireps').select('distance_flown').eq('status', 'Approved');
+            const dist = pireps?.reduce((a, b) => a + (b.distance_flown || 0), 0) || 0;
+            document.getElementById('totalPilots').innerText = pilots || 0;
+            document.getElementById('totalDist').innerText = dist.toLocaleString() + " nm";
             document.getElementById('totalPireps').innerText = pireps?.length || 0;
-            document.getElementById('totalDist').innerText = totalDistance.toLocaleString() + " nm";
         }
-        fetchGlobalStats();
+        loadGlobalStats();
     </script>
 </body>
 </html>
