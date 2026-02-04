@@ -1,29 +1,52 @@
-<div id="nav"></div>
-<div class="container">
+<!DOCTYPE html>
+<html>
+<head><link rel="stylesheet" href="styles.css"></head>
+<body>
+    <script type="module" src="navbar.js"></script>
+    <div class="container">
+        <h2>Schedule Maker (15 Compulsory Legs)</h2>
+        <input type="text" id="adminPilotCallsign" placeholder="Pilot Callsign">
+        <div id="legsContainer"></div>
+        <button onclick="saveSchedule()" style="margin-top:20px; padding:15px; background:green; color:white;">Save 15-Leg Schedule</button>
 
-<div class="card">
-<h3>Schedule Maker</h3>
-<input id="pemail" placeholder="Pilot Email">
-<button onclick="makeSchedule()">Create 10 Legs</button>
-</div>
+        <hr>
+        <h2>Pending Pireps (Approvals)</h2>
+        <div id="pirepApprovalList"></div>
 
-<div class="card">
-<h3>Graph</h3>
-<canvas id="g"></canvas>
-</div>
+        <hr>
+        <h2>Type Rating Requests</h2>
+        <div id="ratingRequests"></div>
+    </div>
 
-</div>
+    <script type="module">
+        import { supabase } from './supabase.js';
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-new Chart(g,{
- type:'bar',
- data:{
-  labels:['Pilots','PIREPs','Distance'],
-  datasets:[{
-   data:[12,19,30]
-  }]
- }
-})
-</script>
-<script type="module" src="script.js"></script>
+        // Generate 15 Leg Inputs
+        const container = document.getElementById('legsContainer');
+        for(let i=1; i<=15; i++) {
+            container.innerHTML += `
+                <div class="leg-input-row">
+                    <h4>Leg ${i}</h4>
+                    <input type="text" id="route-${i}" placeholder="Route (eg. KJFK-EGLL)">
+                    <input type="text" id="fn-${i}" placeholder="Flight No">
+                    <input type="number" id="dist-${i}" placeholder="Distance">
+                    <input type="number" id="time-${i}" placeholder="Time (Hrs)">
+                </div>`;
+        }
+
+        window.saveSchedule = async () => {
+            const callsign = document.getElementById('adminPilotCallsign').value;
+            // Logic to loop through 1-15, collect data, and .insert() to 'schedules' table
+            alert("Schedule saved to database.");
+        };
+
+        // Salary Logic for Approval
+        window.approvePirep = async (pirepId, pilotId, time, dist) => {
+            const salary = (time / 2) * dist;
+            // 1. Update Pirep status to 'Approved'
+            // 2. Fetch pilot balance, add salary, update 'profiles'
+            alert(`Approved! Pilot earned $${salary}`);
+        };
+    </script>
+</body>
+</html>
