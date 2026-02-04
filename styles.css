@@ -1,10 +1,12 @@
-/* General Reset & Center Alignment */
+:root {
+    --primary-gradient: linear-gradient(135deg, #429bf5 0%, #ce42f5 100%);
+}
+
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Inter', 'Segoe UI', sans-serif;
-    /* Updated Color Scheme: #429bf5 to #ce42f5 */
-    background: linear-gradient(135deg, #429bf5 0%, #ce42f5 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--primary-gradient);
     background-attachment: fixed;
     color: white;
     display: flex;
@@ -13,31 +15,27 @@ body {
     min-height: 100vh;
 }
 
-/* Centered Content Wrapper */
-.container, .admin-section, .auth-box, .career-section {
+/* Glassmorphism Containers */
+.container, .stats-box, .career-section {
     background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(15px);
+    backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 20px;
     padding: 30px;
     width: 90%;
     max-width: 900px;
     margin: 20px auto;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-    text-align: center;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
 }
 
-/* Specific Airline Stats Box */
-.airline-stats-box {
-    background: linear-gradient(45deg, #429bf5, #ce42f5);
-    color: white;
-    border-radius: 20px;
-    padding: 25px;
-    margin: 20px 0;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+/* Nav Bar: White Rectangle */
+header {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 20px 0;
 }
 
-/* Nav Bar (White Rectangle) */
 nav {
     background: white;
     border-radius: 50px;
@@ -52,31 +50,26 @@ nav a {
     text-decoration: none;
     color: #333;
     font-weight: 700;
+    transition: 0.3s;
 }
 
-/* Smooth Dropdown Animation */
+/* Admin Button with Gradient */
+.admin-btn {
+    background: var(--primary-gradient);
+    color: white !important;
+    padding: 8px 20px;
+    border-radius: 25px;
+}
+
+/* Smooth Dropdown for Admin */
 .dropdown-content {
     max-height: 0;
     overflow: hidden;
     opacity: 0;
-    transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+    transition: max-height 0.6s ease-out, opacity 0.4s ease;
 }
 
 .dropdown-content.show {
     max-height: 2500px;
     opacity: 1;
-}
-
-/* Dropdown Toggle Button */
-.drop-btn {
-    width: 100%;
-    background: white;
-    color: #429bf5;
-    padding: 15px;
-    border: none;
-    border-radius: 15px;
-    cursor: pointer;
-    font-weight: bold;
-    display: flex;
-    justify-content: space-between;
 }
