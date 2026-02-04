@@ -1,29 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="styles.css">
+    <title>Airline Sign-In</title>
 </head>
 <body>
-
-<div class="container">
- <h1>Sign In</h1>
- <button onclick="signIn()">➕ Sign In</button>
-
- <div id="setup" style="display:none" class="card">
-  <input id="cs" placeholder="Callsign">
-  <input id="namev" placeholder="Name">
-  <select id="career">
-   <option>Flexible</option>
-   <option>Zero</option>
-  </select>
-  <select id="aircraft">
-   <option>B737</option>
-   <option>A320</option>
-  </select>
-  <button onclick="saveProfile()">Save</button>
- </div>
-</div>
-
-<script type="module" src="script.js"></script>
+    <div class="auth-box">
+        <img src="logo.png" alt="Logo" class="login-logo">
+        <h2>Pilot Onboarding</h2>
+        <div id="auth-form">
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <hr>
+            <input type="text" id="callsign" placeholder="Callsign (e.g., VAA001)">
+            <input type="text" id="fullname" placeholder="Full Name">
+            <select id="cmType">
+                <option value="Cadet">Cadet Program</option>
+                <option value="Commercial">Commercial Ops</option>
+            </select>
+            <select id="aircraft">
+                <option value="Cessna 172">Cessna 172</option>
+                <option value="Cirrus SR22">Cirrus SR22</option>
+            </select>
+            <button id="btnAuth">Sign Up / Sign In</button>
+        </div>
+    </div>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
