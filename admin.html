@@ -1,23 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Admin Panel</title>
-<link rel="stylesheet" href="styles.css">
-<script type="module" src="supabase.js"></script>
-<script type="module" src="navbar.js"></script>
+<div id="nav"></div>
+<div class="container">
+
+<div class="card">
+<h3>Schedule Maker</h3>
+<input id="pemail" placeholder="Pilot Email">
+<button onclick="makeSchedule()">Create 10 Legs</button>
+</div>
+
+<div class="card">
+<h3>Graph</h3>
+<canvas id="g"></canvas>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+new Chart(g,{
+ type:'bar',
+ data:{
+  labels:['Pilots','PIREPs','Distance'],
+  datasets:[{
+   data:[12,19,30]
+  }]
+ }
+})
+</script>
 <script type="module" src="script.js"></script>
-</head>
-<body>
-<div id="navbar"></div>
-
-<h2>Schedule Maker</h2>
-<div id="scheduleMakerContainer"></div>
-
-<h2>Stats Graph</h2>
-<div id="statsGraphContainer"></div>
-
-<h2>Type Rating Requests</h2>
-<div id="typeRatingRequests"></div>
-</body>
-</html>
